@@ -1,0 +1,20 @@
+{
+  "manifest_version": 2,
+
+  "name": "better generals.io",
+  "description": "Tools to help play generals.io",  
+  "version": "1.0.0",
+  
+  "content_scripts": [
+    {
+      "matches": ["http://generals.io/*"],
+      "js": ["test.js"]
+    }
+  ],
+
+  "permissions": [
+    "tabs",
+    "activeTab",
+    "storage"
+  ]
+}
