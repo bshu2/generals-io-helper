@@ -3,6 +3,7 @@ var colors = ['red','blue','green','purple','orange','darkgreen','brown','maroon
 var mountains = [];
 var cities = [];
 var generals = [];
+var allies = [];
 //window.onload = set_mutation_observer;
 
 set_mutation_observer();
@@ -36,24 +37,26 @@ function set_mutation_observer() {
 function init() {
   //console.log("init");
   var rows = document.getElementById("game-leaderboard").children[0].children;
-  console.log(rows);
+  
   previous = new Map();
 
-  for (let row of rows) {
-    var name = row.children[1].textContent;
-    row.appendChild(document.createElement('td'));
-    if (name === "Player") {
-      row.children[4].textContent = "ΔArmy";
-    }
-    else {
-      var color = row.children[1].className.split(' ')[1];
-      previous.set(color,{land: 1, army: 1});
-      row.children[4].textContent = "1";
-    }
+  var cols = rows[0].children.length;
+  rows[0].appendChild(document.createElement('td'));
+  rows[0].children[cols].textContent = "ΔArmy";
+  for (let i = 1; i < rows.length; i++) {
+    rows[i].appendChild(document.createElement('td'));
+    var color = rows[i].children[cols - 3].className.split(' ')[1];
+    previous.set(color, {land: 1, army: 1});
+    rows[i].children[cols].textContent = "1";
   }
+
+
+
   mountains = [];
   cities = [];
-  generals = [];}
+  generals = [];
+  allies = document.getElementsByClassName("general");
+}
 
 function getArmyDiff() {
   //console.log("loop");
@@ -117,7 +120,7 @@ function updateKnownObstacles() {
       }
       if (cell.classList.contains("general")) {
         let color = getColor(cell);
-        if (!isDeadGeneral(color)) {
+        if (checkGeneral(color)) {
           generals.push({row:row, col:col, color:color});
         }
       }
@@ -134,12 +137,17 @@ function getColor(cell) {
   return "none";
 }
 
-function isDeadGeneral(color) {
+function checkGeneral(color) {
   var deadGenerals = document.getElementsByClassName("dead");
   for (let dead of deadGenerals) {
     if (dead.children[1].classList.contains(color)) {
-      return true;
+      return false;
     }
   }
-  return false;
+  for (let ally of allies) {
+    if (ally.classList.contains(color)) {
+      return false;
+    }
+  }
+  return true;
 }
