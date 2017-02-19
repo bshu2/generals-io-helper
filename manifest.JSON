@@ -1,10 +1,14 @@
 {
   "manifest_version": 2,
 
-  "name": "better generals.io",
-  "description": "Tools to help play generals.io",  
+  "name": "generals.io helper",
+  "description": "A useful extension for playing generals.io",  
   "version": "1.0.0",
-  
+  "icons": {
+    "16": "obstacle16.png",
+    "48": "obstacle48.png",
+    "128": "obstacle.png"
+  },
   "content_scripts": [
     {
       "matches": ["http://generals.io/*"],
