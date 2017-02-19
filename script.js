@@ -50,27 +50,24 @@ function init() {
     rows[i].children[cols].textContent = "1";
   }
 
-
-
   mountains = [];
   cities = [];
   generals = [];
-  allies = document.getElementsByClassName("general");
+  var alliedGenerals = document.getElementsByClassName("general");
+  for (let ally of alliedGenerals) {
+    allies.push(ally);
+  }
 }
 
 function getArmyDiff() {
-  //console.log("loop");
   var rows = document.getElementById("game-leaderboard").children[0].children;
-  for (let row of rows) {
-    var name = row.children[1].textContent;
-    if (name === "Player") {
-      continue;
-    }
-    var color = row.children[1].className.split(' ')[1];
-    var army = +row.children[2].textContent;
-    var land = +row.children[3].textContent;
+  var cols = rows[0].children.length;
+  for (let i = 1; i < rows.length; i++) {
+    var color = rows[i].children[cols - 4].className.split(' ')[1];
+    var army = +rows[i].children[cols - 3].textContent;
+    var land = +rows[i].children[cols - 2].textContent;
     var armyDiff = army - previous.get(color).army;
-    row.children[4].textContent = armyDiff.toString();
+    rows[i].children[cols - 1].textContent = armyDiff.toString();
 
     previous.set(color, {army: army, land: land});
   }
