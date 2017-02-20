@@ -1,31 +1,40 @@
 var previous, loop, mapLoop;
 var colors = ['red','blue','green','purple','orange','darkgreen','brown','maroon','teal'];
-var mountains = [];
-var cities = [];
-var generals = [];
-var allies = [];
+var mountains = [], cities = [], generals = [], allies = [];
 //window.onload = set_mutation_observer;
 
 set_mutation_observer();
 
 function set_mutation_observer() {
-  console.log("set_mutation_observer");
+  //console.log("set_mutation_observer");
   var target = document.getElementById("react-container");
-
+  var turnObserver;
   var observer = new MutationObserver(function(mutations) {
     mutations.forEach(function(mutation) {
       mutation.addedNodes.forEach(function(added) {
         if (added.id === "game-page") {
           setTimeout(init, 100);
 
-          loop = setInterval(getArmyDiff, 1000);
+          turnCounter = document.getElementById("turn-counter");
+          turnObserver = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+              if (mutation.type === "characterData") {
+                getArmyDiff();
+              }
+            });
+          });
+          var turnConfig = {attributes: true, childList: true, characterData: true, subtree: true };
+          turnObserver.observe(turnCounter, turnConfig);
+
+          //loop = setInterval(getArmyDiff, 1000);
           mapLoop = setInterval(updateMap, 200);
         }
       });
       mutation.removedNodes.forEach(function(removed) {
         if (removed.id === "game-page") {
-          clearInterval(loop);
+          //clearInterval(loop);
           clearInterval(mapLoop);
+          turnObserver.disconnect();
         }
       });
     });
