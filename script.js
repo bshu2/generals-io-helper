@@ -1,6 +1,6 @@
-var previous, loop, mapLoop;
+var previous, turnObserver, boardObserver;
 var colors = ['red','blue','green','purple','orange','darkgreen','brown','maroon','teal'];
-var mountains = [], cities = [], generals = [], allies = [];
+var mountains = [], cities = [], generals = [];
 //window.onload = set_mutation_observer;
 
 set_mutation_observer();
@@ -8,33 +8,17 @@ set_mutation_observer();
 function set_mutation_observer() {
   //console.log("set_mutation_observer");
   var target = document.getElementById("react-container");
-  var turnObserver;
   var observer = new MutationObserver(function(mutations) {
     mutations.forEach(function(mutation) {
       mutation.addedNodes.forEach(function(added) {
         if (added.id === "game-page") {
           setTimeout(init, 100);
-
-          turnCounter = document.getElementById("turn-counter");
-          turnObserver = new MutationObserver(function(mutations) {
-            mutations.forEach(function(mutation) {
-              if (mutation.type === "characterData") {
-                getArmyDiff();
-              }
-            });
-          });
-          var turnConfig = {attributes: true, childList: true, characterData: true, subtree: true };
-          turnObserver.observe(turnCounter, turnConfig);
-
-          //loop = setInterval(getArmyDiff, 1000);
-          mapLoop = setInterval(updateMap, 200);
         }
       });
       mutation.removedNodes.forEach(function(removed) {
         if (removed.id === "game-page") {
-          //clearInterval(loop);
-          clearInterval(mapLoop);
           turnObserver.disconnect();
+          boardObserver.disconnect();
         }
       });
     });
@@ -59,13 +43,33 @@ function init() {
     rows[i].children[cols].textContent = "1";
   }
 
+  var turnCounter = document.getElementById("turn-counter");
+  turnObserver = new MutationObserver(function(mutations) {
+    mutations.forEach(function(mutation) {
+      if (mutation.type === "characterData") {
+        getArmyDiff();
+      }
+    });
+  });
+  var turnConfig = {attributes: true, childList: true, characterData: true, subtree: true };
+  turnObserver.observe(turnCounter, turnConfig);
+
+
+  var leaderboard = document.getElementById("game-leaderboard");
+  boardObserver = new MutationObserver(function(mutations) {
+    mutations.forEach(function(mutation) {
+      if (mutation.type === "characterData") {
+        updateDead();
+        updateMap();
+      }
+     });
+  });
+  var boardConfig = {attributes: true, characterData: true, subtree: true };
+  boardObserver.observe(leaderboard, boardConfig);
+
   mountains = [];
   cities = [];
   generals = [];
-  var alliedGenerals = document.getElementsByClassName("general");
-  for (let ally of alliedGenerals) {
-    allies.push(ally);
-  }
 }
 
 function getArmyDiff() {
@@ -84,6 +88,16 @@ function getArmyDiff() {
 
 function updateMap() {
   var map = document.getElementById("map").children[0];
+  for (let general of generals) {
+    let cell = map.children[general.row].children[general.col];
+    if (!checkGeneral(general.color)) {
+      cell.classList.remove("general", general.color)
+      cities.push({row: general.row, col: general.col})
+    }
+    else if (!cell.classList.contains("city") && !cell.classList.contains("general")) {
+      cell.classList.add("general", general.color);
+    }
+  }
   for (let mountain of mountains) {
     let cell = map.children[mountain.row].children[mountain.col];
     if (!cell.classList.contains("mountain") && cell.classList.contains("obstacle")) {
@@ -96,12 +110,6 @@ function updateMap() {
     if (!cell.classList.contains("city") && cell.classList.contains("obstacle")) {
       cell.classList.add("city");
       cell.classList.remove("obstacle");
-    }
-  }
-  for (let general of generals) {
-    let cell = map.children[general.row].children[general.col];
-    if (!cell.classList.contains("city") && !cell.classList.contains("general")) {
-      cell.classList.add("general", general.color);
     }
   }
   updateKnownObstacles();
@@ -143,15 +151,25 @@ function getColor(cell) {
   return "none";
 }
 
+function updateDead() {
+  var cols = document.getElementById("game-leaderboard").children[0].children[0].children.length;
+  var deadGenerals = document.getElementsByClassName("dead");
+  for (let general of generals) {
+    for (let dead of deadGenerals) {
+      if (dead.children[cols - 4].classList.contains(general.color)) {
+        var map = document.getElementById("map").children[0];
+        let cell = map.children[general.row].children[general.col];
+        cell.classList.remove("general", general.color)
+        cities.push({row: general.row, col: general.col})
+      }
+    }
+  }
+}
+
 function checkGeneral(color) {
   var deadGenerals = document.getElementsByClassName("dead");
   for (let dead of deadGenerals) {
     if (dead.children[1].classList.contains(color)) {
-      return false;
-    }
-  }
-  for (let ally of allies) {
-    if (ally.classList.contains(color)) {
       return false;
     }
   }

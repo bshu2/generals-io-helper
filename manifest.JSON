@@ -3,7 +3,7 @@
 
   "name": "generals.io helper",
   "description": "A useful extension for playing generals.io",  
-  "version": "1.0.1",
+  "version": "1.0.4",
   "icons": {
     "16": "obstacle16.png",
     "48": "obstacle48.png",
@@ -11,7 +11,7 @@
   },
   "content_scripts": [
     {
-      "matches": ["http://generals.io/*"],
+      "matches": ["http://*.generals.io/*"],
       "js": ["script.js"]
     }
   ]
